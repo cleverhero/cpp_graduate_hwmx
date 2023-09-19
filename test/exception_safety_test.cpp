@@ -53,7 +53,7 @@ public:
         entity_counter++;
     }
 
-    operator double() {
+    operator double() const noexcept {
         return static_cast<double>(val);
     }
 

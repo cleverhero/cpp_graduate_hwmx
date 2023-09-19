@@ -5,6 +5,10 @@
 
 
 namespace hwmx {
+    // Experiment with CRTP pattern.
+    // I assumed that I would need more that one general iterator class,
+    // Then MixShiftable would have helped me to avoid repetitive code.
+    // But MixShiftable is useful to incapsulate boilerplate code, i think.
     template<typename Derived>
     class MixShiftable {
         using difference_type = std::ptrdiff_t;
@@ -64,6 +68,9 @@ namespace hwmx {
     };
 
 
+    // Class to iterate over matrix.
+    // Options is_one_line and is_col_major are needed to slightly change the logic of iteration.
+    // E.g. MatrixGeneralIterator<T, true, true> -- iterator to iterate over one certain column of matrix.
     template<typename T, bool is_one_line = false, bool is_col_major = false>
     class MatrixGeneralIterator 
         : public MixShiftable<MatrixGeneralIterator<T, is_one_line, is_col_major>>

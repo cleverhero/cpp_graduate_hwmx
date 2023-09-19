@@ -2,6 +2,9 @@
 
 
 namespace hwmx {
+    // MatrixLine -- proxy col or row of matrix that don't own resources.
+    // It's can convert to Vector via copying resources and
+    // do inplace math operations.
     template<typename T, bool is_col = false>
     class MatrixLine {
         T* data;

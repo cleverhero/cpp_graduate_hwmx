@@ -7,6 +7,8 @@
 namespace hwmx {
     template<typename T, bool is_col> class MatrixLine;
 
+
+    // Vector is necessary to locate MatrixLine in own memory.
     template<typename T>
     class Vector: private ElementsBuf<T> {
         using II = RowMajorIterator<T, true>;
