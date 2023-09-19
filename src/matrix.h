@@ -16,12 +16,21 @@ namespace views = std::views;
 
 
 namespace hwmx {
-    template<typename T> class Matrix;
-
-    size_t gaussian_elimination(Matrix<double>& matrix);
-
-
     template<typename T>
+    class MatrixTraits {
+    public:
+        static double to_double(T value) {
+            return static_cast<double>(value);
+        }
+    };
+
+
+    template<typename T, typename Traits> class Matrix;
+
+    size_t gaussian_elimination(Matrix<double, MatrixTraits<double>>& matrix);
+
+
+    template<typename T, typename Traits = MatrixTraits<T>>
     class Matrix : private ElementsBuf<T> {
         template<bool is_one_line = false>
         using RMI = RowMajorIterator<T, is_one_line>;
@@ -90,7 +99,7 @@ namespace hwmx {
             Matrix<double> m{ x, y };
             std::transform(
                 begin(), end(), m.begin(),
-                [](T el) { return double(el); }
+                [](T el) { return Traits::to_double(el); }
             );
             size_t count_swaps = gaussian_elimination(m);
             
@@ -107,7 +116,7 @@ namespace hwmx {
 
         static Matrix eye(size_t n) {
             Matrix m{ n, n };
-            auto to_n_view = views::iota(0, (int)n); // MSVS BUG. EXPECTED size_t;
+            auto to_n_view = views::iota((size_t)0, n);
             auto set_one = [&m](size_t i) { m.set_value(i, i, 1); };
             ranges::for_each(to_n_view, set_one);
 
@@ -115,7 +124,7 @@ namespace hwmx {
         }
 
         static Matrix iota(size_t n) {
-            auto elements = views::iota(0, (int)(n * n)); // MSVS BUG. EXPECTED size_t;
+            auto elements = views::iota((size_t)0, (n * n));
             return Matrix{ n, n, elements.begin(), elements.end(),  };
         }
 
