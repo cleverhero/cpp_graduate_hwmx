@@ -1,0 +1,8 @@
+#pragma once
+
+#include <string>
+
+
+namespace Config {
+    static const std::string RESOURCES_PATH = "@RESOURCES_PATH@";
+}
