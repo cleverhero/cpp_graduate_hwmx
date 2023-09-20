@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <numeric>
+#include <vector>
 #include <ranges>
 
 #include "elements_buffer.h"
