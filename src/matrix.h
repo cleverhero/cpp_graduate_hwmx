@@ -23,6 +23,13 @@ namespace hwmx {
     size_t gaussian_elimination(Matrix<double, false, MatrixTraits<double>>& matrix) noexcept;
 
 
+    class non_square_matrix_error : public std::runtime_error {
+    public:
+        non_square_matrix_error() throw()
+            : std::runtime_error("Matrix is non square.") {};
+    };
+
+
     template<typename T, bool is_lazy = false, typename Traits = MatrixTraits<T>>
     class Matrix : private _ElementsBuf<T, is_lazy> {
         template<bool is_one_line = false>
@@ -77,15 +84,14 @@ namespace hwmx {
 
         static Matrix eye(size_t n) {
             Matrix m{ n, n };
-            auto to_n_view = views::iota((size_t)0, n);
-            auto set_one = [&m](size_t i) { m.set_value(i, i, 1); };
-            ranges::for_each(to_n_view, set_one);
+            for (int i = 0; i < n; i++)
+                m.set_value(i, i, 1);
 
             return m;
         }
 
         static Matrix iota(size_t n) {
-            auto elements = views::iota((size_t)0, (n * n));
+            auto elements = views::iota(0u, (n * n));
             return Matrix{ n, n, elements.begin(), elements.end(),  };
         }
 
@@ -110,8 +116,9 @@ namespace hwmx {
             }
         }
 
-        double det() const noexcept {
-            assert(x == y);
+        double det() const {
+            if (x != y)
+                throw non_square_matrix_error{};
 
             Matrix<double> m{ x, y };
             std::transform(
