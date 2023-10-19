@@ -5,23 +5,26 @@
 
 
 namespace hwmx {
-    template<typename T, bool is_col> class MatrixLine;
+    template<typename M, bool is_col> class MatrixLine;
 
 
     // Vector is necessary to locate MatrixLine in own memory.
-    template<typename T>
-    class Vector: private ElementsBuf<T> {
+    template<typename T, bool is_lazy = false>
+    class Vector: private _ElementsBuf<T, is_lazy> {
         using II = RowMajorIterator<T, true>;
+        using const_II = RowMajorIterator<const T, true>;
 
-        using ElementsBuf<T>::data;
-        using ElementsBuf<T>::size;
+        using _ElementsBuf<T, is_lazy>::data;
+        using _ElementsBuf<T, is_lazy>::size;
 
-        using ElementsBuf<T>::swap;
+        using _ElementsBuf<T, is_lazy>::swap;
 
     public:
-        Vector(size_t size, T val = T{}) : ElementsBuf<T>(size, val) {}
+        Vector(size_t size, T val = T{}) : _ElementsBuf<T, is_lazy>(size, val) {}
 
-        Vector(const Vector& rhs) : ElementsBuf<T>(rhs) {}
+        template<typename IT>
+        Vector(size_t size, const IT& first, const IT& second):
+            _ElementsBuf<T, is_lazy>(size, first, second) {}
 
         Vector& operator=(const Vector& rhs) {
             Vector tmp{ rhs };
@@ -30,32 +33,36 @@ namespace hwmx {
             return *this;
         }
 
-        Vector(Vector&& rhs) noexcept : ElementsBuf<T>(std::move(rhs)) {}
+        Vector(const Vector& rhs) : _ElementsBuf<T, is_lazy>(rhs) {}
+
+        Vector(Vector&& rhs) noexcept : _ElementsBuf<T, is_lazy>(std::move(rhs)) {}
 
         Vector& operator=(Vector&& rhs) noexcept {
             swap(rhs);
             return *this;
-        }
+        }        
 
-        template<bool is_col>
-        Vector(const MatrixLine<T, is_col>& rhs): 
-            ElementsBuf<T>(rhs.size(), rhs.begin(), rhs.end()) {}
 
-        template<typename IT>
-        Vector(size_t size, const IT& first, const IT& second):
-            ElementsBuf<T>(size, first, second) {}
+        // const
 
-        T& operator[](size_t ind) const noexcept {
-            return data[ind];
-        }
+        T get_value(size_t ind) const { return data[ind]; }
 
-        void print() const {
+        void print() const noexcept {
             for (size_t i = 0; i < size; i++)
-                std::cout << data[i] << ' ';
+                std::cout << get_value(i) << ' ';
         }
 
-        II begin() const noexcept { return II{ data, 0, 0, 0, size }; }
-        II end() const noexcept { return II{ data, 0, size, 0, size }; }
+        Vector<T> operator*(const T& rhs) const {
+            Vector<T> res{ *this };
+
+            res *= rhs;
+            return res;
+        }
+
+
+        //mutable
+
+        T& operator[](size_t ind) { return data[ind]; }
 
         Vector& operator*=(const T& rhs) noexcept {
             for (auto& el : *this)
@@ -63,5 +70,17 @@ namespace hwmx {
 
             return *this;
         }
+
+
+        // iters
+
+        II begin() noexcept { return II{ data, 0, 0, 0, size }; }
+        II end() noexcept { return II{ data, 0, size, 0, size }; }
+
+
+        // const_iters
+
+        const_II cbegin() const noexcept { return const_II{ data, 0, 0, 0, size }; }
+        const_II cend() const noexcept { return const_II{ data, 0, size, 0, size }; }
     };
 }
