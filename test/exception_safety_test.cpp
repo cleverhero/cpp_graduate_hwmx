@@ -65,6 +65,9 @@ public:
 
 TEST(HwmxTests, Test_ES) {
     {
+        ctr_counter = 0; copy_ctr_counter = 0; entity_counter = 0;
+        check_exc = false;
+
         hwmx::Matrix<MyInt> m{2, 5};
         hwmx::Matrix<MyInt> m_tmp{2, 5};
 
@@ -81,6 +84,37 @@ TEST(HwmxTests, Test_ES) {
 
         try {
             m_tmp = m;
+        }
+        catch (const myint_error& exc) {}
+    }
+
+    ASSERT_EQ(entity_counter, 0);
+}
+
+
+TEST(HwmxTests, Test_ES_lazy) {
+    {
+        ctr_counter = 0; copy_ctr_counter = 0; entity_counter = 0;
+        check_exc = false;
+
+        hwmx::Matrix<MyInt, true> m{2, 5};
+        hwmx::Matrix<MyInt, true> m_tmp{2, 5};
+
+        check_exc = true;
+        try {
+            hwmx::Matrix<MyInt, true> m2{2, 5};
+        }
+        catch (const myint_error& exc) {}
+
+        try {
+            hwmx::Matrix<MyInt, true> m2 = m;
+            m2[0][0] = 10;
+        }
+        catch (const myint_error& exc) {}
+
+        try {
+            m_tmp = m;
+            m_tmp[0][0] = 10;
         }
         catch (const myint_error& exc) {}
     }

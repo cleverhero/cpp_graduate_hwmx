@@ -25,6 +25,11 @@ add_executable(det_test det_test.cpp)
 target_include_directories(det_test PUBLIC ${CONFIG_DIR} ${HEADERS_DIR})
 target_link_libraries(det_test PRIVATE GTest::GTest hwmx_lib)
 
+add_executable(lazy_behavior_test lazy_behavior_test.cpp)
+target_include_directories(lazy_behavior_test PUBLIC ${CONFIG_DIR} ${HEADERS_DIR})
+target_link_libraries(lazy_behavior_test PRIVATE GTest::GTest hwmx_lib)
+
 
 add_test(es_test es_test)
 add_test(det_test det_test)
+add_test(lazy_behavior_test lazy_behavior_test)
