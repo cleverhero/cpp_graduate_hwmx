@@ -139,6 +139,7 @@ namespace hwmx {
 
     public:
         reference operator*() { return *(data + ix * y + iy); }
+        reference operator[](const difference_type& k) { return *(*this + k); }
         pointer operator->() { return data + ix * y + iy; }
         auto operator<=>(const MatrixGeneralIterator& rhs) const = default;
         bool operator==(const MatrixGeneralIterator& rhs) const {
