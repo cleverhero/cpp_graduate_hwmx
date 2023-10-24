@@ -10,21 +10,21 @@ namespace hwmx {
 
     // Vector is necessary to locate MatrixLine in own memory.
     template<typename T, bool is_lazy = false>
-    class Vector: private _ElementsBuf<T, is_lazy> {
+    class Vector: private ElementsBuf_<T, is_lazy> {
         using II = RowMajorIterator<T, true>;
         using const_II = RowMajorIterator<const T, true>;
 
-        using _ElementsBuf<T, is_lazy>::data;
-        using _ElementsBuf<T, is_lazy>::size;
+        using ElementsBuf_<T, is_lazy>::data;
+        using ElementsBuf_<T, is_lazy>::size;
 
-        using _ElementsBuf<T, is_lazy>::swap;
+        using ElementsBuf_<T, is_lazy>::swap;
 
     public:
-        Vector(size_t size, T val = T{}) : _ElementsBuf<T, is_lazy>(size, val) {}
+        Vector(size_t size, T val = T{}) : ElementsBuf_<T, is_lazy>(size, val) {}
 
         template<typename IT>
         Vector(size_t size, const IT& first, const IT& second):
-            _ElementsBuf<T, is_lazy>(size, first, second) {}
+            ElementsBuf_<T, is_lazy>(size, first, second) {}
 
         Vector& operator=(const Vector& rhs) {
             Vector tmp{ rhs };
@@ -33,9 +33,9 @@ namespace hwmx {
             return *this;
         }
 
-        Vector(const Vector& rhs) : _ElementsBuf<T, is_lazy>(rhs) {}
+        Vector(const Vector& rhs) : ElementsBuf_<T, is_lazy>(rhs) {}
 
-        Vector(Vector&& rhs) noexcept : _ElementsBuf<T, is_lazy>(std::move(rhs)) {}
+        Vector(Vector&& rhs) noexcept : ElementsBuf_<T, is_lazy>(std::move(rhs)) {}
 
         Vector& operator=(Vector&& rhs) noexcept {
             swap(rhs);

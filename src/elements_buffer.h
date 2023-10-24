@@ -235,7 +235,7 @@ namespace hwmx {
     };
 
     template<typename T, bool is_lazy>
-    using _ElementsBuf = std::conditional_t<
+    using ElementsBuf_ = std::conditional_t<
         is_lazy,
         SharedElementsBuf<T>,
         ElementsBuf<T>

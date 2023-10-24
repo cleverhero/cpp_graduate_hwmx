@@ -31,7 +31,7 @@ namespace hwmx {
 
 
     template<typename T, bool is_lazy = false, typename Traits = MatrixTraits<T>>
-    class Matrix : private _ElementsBuf<T, is_lazy> {
+    class Matrix : private ElementsBuf_<T, is_lazy> {
         template<bool is_one_line = false>
         using RMI = RowMajorIterator<T, is_one_line>;
 
@@ -52,17 +52,17 @@ namespace hwmx {
 
         size_t x, y;
 
-        using _ElementsBuf<T, is_lazy>::data;
-        using _ElementsBuf<T, is_lazy>::size;
+        using ElementsBuf_<T, is_lazy>::data;
+        using ElementsBuf_<T, is_lazy>::size;
 
-        using _ElementsBuf<T, is_lazy>::swap;
+        using ElementsBuf_<T, is_lazy>::swap;
     public:
         using elements_type = T;
 
         Matrix(size_t x, size_t y, T val = T{}):
-            x(x), y(y), _ElementsBuf<T, is_lazy>(x*y, val) {}
+            x(x), y(y), ElementsBuf_<T, is_lazy>(x*y, val) {}
 
-        Matrix(const Matrix& rhs) : x(rhs.x), y(rhs.y), _ElementsBuf<T, is_lazy>(rhs) {}
+        Matrix(const Matrix& rhs) : x(rhs.x), y(rhs.y), ElementsBuf_<T, is_lazy>(rhs) {}
 
         Matrix& operator=(const Matrix& rhs) {
             Matrix tmp{ rhs };
@@ -71,7 +71,7 @@ namespace hwmx {
             return *this;
         }
 
-        Matrix(Matrix&& rhs) : _ElementsBuf<T, is_lazy>(std::move(rhs)) {}
+        Matrix(Matrix&& rhs) : ElementsBuf_<T, is_lazy>(std::move(rhs)) {}
 
         Matrix& operator=(Matrix&& rhs) {
             swap(rhs);
@@ -80,7 +80,7 @@ namespace hwmx {
 
         template<typename IT>
         Matrix(size_t x, size_t y, const IT& first, const IT& second):
-            x(x), y(y), _ElementsBuf<T, is_lazy>(x*y, first, second) {}
+            x(x), y(y), ElementsBuf_<T, is_lazy>(x*y, first, second) {}
 
         static Matrix eye(size_t n) {
             Matrix m{ n, n };
@@ -153,21 +153,21 @@ namespace hwmx {
 
         void set_value(size_t ix, size_t iy, T value) {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             data[ix * y + iy] = value;
         }
 
         T& ref_value(size_t ix, size_t iy) {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             return data[ix * y + iy];
         }
 
         void swap_rows(size_t ix1, size_t ix2) {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             std::swap_ranges(
                 data + ix1 * y,
@@ -182,7 +182,7 @@ namespace hwmx {
         template<bool is_col_major = false>
         II<is_col_major> item_iter(size_t ix, size_t iy) noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             return II<is_col_major>{ data, ix, iy, x, y };
         }
@@ -190,7 +190,7 @@ namespace hwmx {
         template<bool is_col = false>
         MatrixGeneralIterator<T, true, is_col> line_begin(size_t ln) noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             if constexpr (is_col)
                 return MatrixGeneralIterator<T, true, is_col>{ data, 0, ln, x, y };
@@ -201,7 +201,7 @@ namespace hwmx {
         template<bool is_col = false>
         MatrixGeneralIterator<T, true, is_col> line_end(size_t ln) noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             if constexpr (is_col)
                 return MatrixGeneralIterator<T, true, is_col>{ data, x, ln, x, y };
@@ -211,26 +211,26 @@ namespace hwmx {
 
         RMI<> begin() noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             return item_iter(0, 0);
         }
         RMI<> end() noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             return item_iter(x, 0);
         }
 
         CMI<> col_begin() const noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
             
             return item_iter<true>(0, 0);
         }
         CMI<> col_end() const noexcept {
             if constexpr (is_lazy)
-                _ElementsBuf<T, is_lazy>::cow();
+                ElementsBuf_<T, is_lazy>::cow();
 
             return item_iter<true>(0, y);
         }
