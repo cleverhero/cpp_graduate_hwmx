@@ -265,4 +265,7 @@ namespace hwmx {
         const_CMI<> col_cbegin() const noexcept { return item_citer<true>(0, 0); }
         const_CMI<> col_cend() const noexcept { return item_citer<true>(0, y); }
     };
+
+    template<typename T, typename Traits = MatrixTraits<T>>
+    using LazyMatrix = Matrix<T, true, Traits>;
 }

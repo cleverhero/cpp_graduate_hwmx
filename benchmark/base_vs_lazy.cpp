@@ -19,9 +19,10 @@ M::elements_type random_change_and_det(M matrix) {
 
 template<typename M>
 float benchmark(int n, int k) {
+    M matrix = M::eye(n);
+
     auto t0 = clock();
 
-    M matrix = M::eye(n);
     for (int i = 0; i < k; i++)
         random_change_and_det(matrix);
 
@@ -39,6 +40,6 @@ int main(int argc, char** argv) {
     auto dt = benchmark<hwmx::Matrix<int>>(N, K);
     std::cout << "NonLazy matrix: " << dt / CLOCKS_PER_SEC << std::endl;
 
-    auto lazy_dt = benchmark<hwmx::Matrix<int, true>>(N, K);
+    auto lazy_dt = benchmark<hwmx::LazyMatrix<int>>(N, K);
     std::cout << "Lazy matrix: " << lazy_dt / CLOCKS_PER_SEC << std::endl;
 }
