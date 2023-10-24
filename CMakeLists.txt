@@ -9,6 +9,7 @@ enable_testing()
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(benchmark)
 
 add_executable(det src/det.cpp)
 target_link_libraries(det hwmx_lib)

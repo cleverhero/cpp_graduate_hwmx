@@ -21,3 +21,9 @@
 ❯ ./det
 ❯ 2 42 1 1 1
 ```
+
+#### Running benchmark
+
+```bash
+❯ ./benchmarks/base_vs_lazy.cpp {N} {K}
+```
