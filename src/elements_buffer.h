@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stddef.h>
 #include <algorithm>
 
@@ -51,7 +52,7 @@ namespace hwmx {
             std::swap(used, rhs.used);
         }
 
-        ~MemoryBuf() {
+        virtual ~MemoryBuf() {
             destroy(data, data + used);
             ::operator delete(data);
         }
@@ -73,8 +74,10 @@ namespace hwmx {
         }
 
         template<typename IT>
-        ElementsBuf(size_t size, const IT& first, const IT& second) : MemoryBuf<T>(size) {
-            for (auto cfirst = first; cfirst != second; cfirst++) {
+        ElementsBuf(size_t size, const IT& first) : MemoryBuf<T>(size) {
+            auto cfirst = first;
+            for (int i = 0; i < size; i++) {
+                if (i > 0) cfirst++;
                 construct<T>(data + used, *cfirst);
                 used += 1;
             }
@@ -173,7 +176,7 @@ namespace hwmx {
 
         size_t get_counter() noexcept { return control_block_ptr->get_counter(); }
 
-        ~SharedMemoryBuf() {
+        virtual ~SharedMemoryBuf() {
             if (!control_block_ptr)
                 return;
 
@@ -203,8 +206,10 @@ namespace hwmx {
         }
 
         template<typename IT>
-        SharedElementsBuf(size_t size, const IT& first, const IT& second) : SharedMemoryBuf<T>(size) {
-            for (auto cfirst = first; cfirst != second; cfirst++) {
+        SharedElementsBuf(size_t size, const IT& first) : SharedMemoryBuf<T>(size) {
+            auto cfirst = first;
+            for (int i = 0; i < size; i++) {
+                if (i > 0) cfirst++;
                 construct<T>(data + used, *cfirst);
                 used += 1;
             }
@@ -229,7 +234,7 @@ namespace hwmx {
             if (get_counter() == 1)
                 return;
 
-            SharedElementsBuf new_buffer(size, data, data + used);
+            SharedElementsBuf new_buffer(size, data);
             swap(new_buffer);
         }
     };

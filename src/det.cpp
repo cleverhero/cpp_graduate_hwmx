@@ -13,8 +13,7 @@ int main() {
 
     auto m = Matrix<double>{ 
         n, n, 
-        std::istream_iterator<double>(std::cin),
-        std::istream_iterator<double>() 
+        std::istream_iterator<double>(std::cin)
     };
 
 	std::cout << m.det() << std::endl;

@@ -23,8 +23,8 @@ namespace hwmx {
         Vector(size_t size, T val = T{}) : ElementsBuf_<T, is_lazy>(size, val) {}
 
         template<typename IT>
-        Vector(size_t size, const IT& first, const IT& second):
-            ElementsBuf_<T, is_lazy>(size, first, second) {}
+        Vector(size_t size, const IT& first):
+            ElementsBuf_<T, is_lazy>(size, first) {}
 
         Vector& operator=(const Vector& rhs) {
             Vector tmp{ rhs };

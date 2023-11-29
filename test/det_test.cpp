@@ -12,8 +12,8 @@ using Config::RESOURCES_PATH;
 TEST(HwmxTests, Test_Big) {
     path resources(RESOURCES_PATH);
     std::fstream testf, answerf;
-    testf.open(resources / "big_test.in", std::ios::in);
-    answerf.open(resources /"big_test.out", std::ios::in);
+    testf.open(resources / "det/big_test.in", std::ios::in);
+    answerf.open(resources /"det/big_test.out", std::ios::in);
 
     if (!testf || !answerf) {
         std::cout << "NO SUCH FILE!!" << std::endl;
@@ -22,11 +22,7 @@ TEST(HwmxTests, Test_Big) {
 
     size_t size; testf >> size;
     double ans; answerf >> ans;
-    auto m = hwmx::Matrix<double>{ 
-        size, size, 
-        std::istream_iterator<double>(testf),
-        std::istream_iterator<double>() 
-    };
+    auto m = hwmx::Matrix<double>{ size, size, std::istream_iterator<double>(testf) };
 
     ASSERT_FLOAT_EQ(m.det(), ans);
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 
 namespace hwmx {
     template<typename T, bool is_lazy, typename Traits> class Matrix;
@@ -8,18 +10,19 @@ namespace hwmx {
     // MatrixLine -- proxy col or row of matrix that don't own resources.
     // It's can convert to Vector via copying resources and
     // do inplace math operations.
-    template<typename M, bool is_col = false>
+    template<typename T, bool is_col = false>
     class MatrixLine {
-        using T = typename M::elements_type;
-
-        M* matrix_ptr;
+        T* data;
         size_t ln;
+        size_t x, y;
 
     public:
-        MatrixLine(M* matrix_ptr, size_t ln): matrix_ptr(matrix_ptr), ln(ln) {}
+        MatrixLine(T* data, size_t ln, size_t x, size_t y):
+            data(data), ln(ln), x(x), y(y) {}
         MatrixLine(const MatrixLine& rhs) = delete;
-        MatrixLine(MatrixLine&& rhs): matrix_ptr(rhs.matrix_ptr), ln(rhs.ln) {
-            rhs.matrix_ptr = nullptr;
+        MatrixLine(MatrixLine&& rhs) :
+            data(rhs.data), ln(rhs.ln), x(rhs.x), y(rhs.y) {
+            rhs.data = nullptr;
         };
 
 
@@ -27,23 +30,23 @@ namespace hwmx {
 
         size_t size() const noexcept {
             if constexpr (is_col)
-                return matrix_ptr->rows();
+                return x;
             else
-                return matrix_ptr->cols();
+                return y;
         }
 
         T get_value(size_t ind) const {
             if constexpr(is_col)
-                return matrix_ptr->get_value(ind, ln);
+                return data[ind * y + ln];
             else
-                return matrix_ptr->get_value(ln, ind);
+                return data[ln * y + ind];
         }
 
         const T& const_ref_value(size_t ind) const {
             if constexpr(is_col)
-                return matrix_ptr->const_ref_value(ind, ln);
+                return data[ind * y + ln];
             else
-                return matrix_ptr->const_ref_value(ln, ind);
+                return data[ln * y + ind];
         }
 
         void print() const noexcept {
@@ -59,7 +62,7 @@ namespace hwmx {
         }
 
         operator Vector<T>() const {
-            return Vector<T>{ size(), cbegin(), cend() };
+            return Vector<T>{ size(), cbegin() };
         }
 
 
@@ -67,9 +70,9 @@ namespace hwmx {
 
         T& operator[](size_t ind) {
             if constexpr(is_col)
-                return matrix_ptr->ref_value(ind, ln);
+                return data[ind * y + ln];
             else
-                return matrix_ptr->ref_value(ln, ind);
+                return data[ln * y + ind];
         }
 
         MatrixLine& operator-=(const Vector<T>& rhs) {
@@ -89,29 +92,48 @@ namespace hwmx {
         // iters
 
         MatrixGeneralIterator<T, true, is_col> begin() noexcept {
-            return matrix_ptr->template line_begin<is_col>(ln);
+            if constexpr (is_col)
+                return MatrixGeneralIterator<T, true, is_col>{ data, 0, ln, x, y };
+            else
+                return MatrixGeneralIterator<T, true, is_col>{ data, ln, 0, x, y };
         }
 
         MatrixGeneralIterator<T, true, is_col> end() noexcept {
-            return matrix_ptr->template line_end<is_col>(ln);
+            if constexpr (is_col)
+                return MatrixGeneralIterator<T, true, is_col>{ data, x, ln, x, y };
+            else
+                return MatrixGeneralIterator<T, true, is_col>{ data, ln, y, x, y };
         }
 
 
         // const_iters
 
         MatrixGeneralIterator<const T, true, is_col> cbegin() const noexcept {
-            return matrix_ptr->template line_cbegin<is_col>(ln);
+            if constexpr (is_col)
+                return MatrixGeneralIterator<const T, true, is_col>{ data, 0, ln, x, y };
+            else
+                return MatrixGeneralIterator<const T, true, is_col>{ data, ln, 0, x, y };
         }
 
         MatrixGeneralIterator<const T, true, is_col> cend() const noexcept {
-            return matrix_ptr->template line_cend<is_col>(ln);
+            if constexpr (is_col)
+                return MatrixGeneralIterator<const T, true, is_col>{ data, x, ln, x, y };
+            else
+                return MatrixGeneralIterator<const T, true, is_col>{ data, ln, y, x, y };
         }
     };
-
 
     template<typename M>
     using Row = MatrixLine<M, false>;
 
     template<typename M>
     using Col = MatrixLine<M, true>;
+
+    template<typename T, bool is_col1, bool is_col2>
+    auto operator*(const MatrixLine<T, is_col1>& lhs, const MatrixLine<T, is_col2>& rhs) {
+        return std::transform_reduce(
+            lhs.cbegin(), lhs.cend(), rhs.cbegin(), T{}, std::plus{},
+            [](auto lv, auto rv) { return lv * rv; }
+        );
+    }
 }

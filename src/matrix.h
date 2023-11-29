@@ -5,6 +5,7 @@
 #include <numeric>
 #include <vector>
 #include <ranges>
+#include <optional>
 
 #include "elements_buffer.h"
 #include "vector.h"
@@ -28,10 +29,46 @@ namespace hwmx {
         non_square_matrix_error() throw()
             : std::runtime_error("Matrix is non square.") {};
     };
+    
+
+    template<typename T>
+    class IBaseMatrix {
+    public:
+        // const
+
+        virtual size_t cols() const noexcept = 0;
+        virtual size_t rows() const noexcept = 0;
+
+        virtual T get_value(size_t ix, size_t iy) const = 0;
+        virtual const T& const_ref_value(size_t ix, size_t iy) const = 0;
+
+        virtual const Row<const T> operator[](size_t ix) const = 0;
+
+        virtual const Col<const T> col(size_t iy) const = 0;
+        virtual const Row<const T> row(size_t ix) const = 0;
+
+        // mutable
+
+        virtual Row<T> operator[](size_t ix) = 0;
+
+        virtual Col<T> col(size_t iy) = 0;
+        virtual Row<T> row(size_t ix) = 0;
+
+        virtual T& ref_value(size_t ix, size_t iy) = 0;
+
+        virtual void set_value(size_t ix, size_t iy, T value) = 0;
+
+        // dtor
+
+        virtual ~IBaseMatrix() {};
+    };
 
 
     template<typename T, bool is_lazy = false, typename Traits = MatrixTraits<T>>
-    class Matrix : private ElementsBuf_<T, is_lazy> {
+    class Matrix final: 
+        private ElementsBuf_<T, is_lazy>,
+        public IBaseMatrix<T>
+    {
         template<bool is_one_line = false>
         using RMI = RowMajorIterator<T, is_one_line>;
 
@@ -71,16 +108,20 @@ namespace hwmx {
             return *this;
         }
 
-        Matrix(Matrix&& rhs) : ElementsBuf_<T, is_lazy>(std::move(rhs)) {}
+        Matrix(Matrix&& rhs) : 
+            ElementsBuf_<T, is_lazy>(std::move(rhs)),
+            x(rhs.x), y(rhs.y) {}
 
         Matrix& operator=(Matrix&& rhs) {
             swap(rhs);
+            x = rhs.x;
+            y = rhs.y;
             return *this;
         }
 
         template<typename IT>
-        Matrix(size_t x, size_t y, const IT& first, const IT& second):
-            x(x), y(y), ElementsBuf_<T, is_lazy>(x*y, first, second) {}
+        Matrix(size_t x, size_t y, const IT& first):
+            x(x), y(y), ElementsBuf_<T, is_lazy>(x*y, first) {}
 
         static Matrix eye(size_t n) {
             Matrix m{ n, n };
@@ -92,14 +133,18 @@ namespace hwmx {
 
         static Matrix iota(size_t n) {
             auto elements = views::iota(0u, (n * n));
-            return Matrix{ n, n, elements.begin(), elements.end(),  };
+            return Matrix{ n, n, elements.begin(), elements.end() };
         }
 
 
         // const
 
-        size_t cols() const noexcept { return y; }
-        size_t rows() const noexcept { return x; }
+        size_t cols() const noexcept { 
+            return y; 
+        }
+        size_t rows() const noexcept { 
+            return x;
+        }
 
         T get_value(size_t ix, size_t iy) const {
             return data[ix * y + iy];
@@ -138,18 +183,34 @@ namespace hwmx {
             );
         }
 
-        const Col<const Matrix> col(size_t iy) const { return Col<const Matrix>{ this, iy }; }
-        const Row<const Matrix> row(size_t ix) const { return Row<const Matrix>{ this, ix }; }
+        const Col<const T> col(size_t iy) const { return Col<const T>{ data, iy, x, y }; }
+        const Row<const T> row(size_t ix) const { return Row<const T>{ data, ix, x, y }; }
 
-        const Row<const Matrix> operator[](size_t ix) const { return row(ix); }
+        const Row<const T> operator[](size_t ix) const { return row(ix); }
 
 
         // mutable
 
-        Col<Matrix> col(size_t iy) { return Col<Matrix>{ this, iy }; }
-        Row<Matrix> row(size_t ix) { return Row<Matrix>{ this, ix }; }
+        Col<T> col(size_t iy) { 
+            if constexpr (is_lazy)
+                ElementsBuf_<T, is_lazy>::cow();
 
-        Row<Matrix> operator[](size_t ix) { return row(ix); }
+            return Col<T>{ data, iy, x, y };
+        }
+
+        Row<T> row(size_t ix) { 
+            if constexpr (is_lazy)
+                ElementsBuf_<T, is_lazy>::cow();
+
+            return Row<T>{ data, ix, x, y };
+        }
+
+        Row<T> operator[](size_t ix) { 
+            if constexpr (is_lazy)
+                ElementsBuf_<T, is_lazy>::cow();
+
+            return row(ix); 
+        }
 
         void set_value(size_t ix, size_t iy, T value) {
             if constexpr (is_lazy)
@@ -235,7 +296,6 @@ namespace hwmx {
             return item_iter<true>(0, y);
         }
 
-
         // const_iterators
 
         template<bool is_col_major = false>
@@ -268,4 +328,20 @@ namespace hwmx {
 
     template<typename T, typename Traits = MatrixTraits<T>>
     using LazyMatrix = Matrix<T, true, Traits>;
+
+
+    template<typename T>
+    LazyMatrix<T> operator*(const IBaseMatrix<T>& lhs, const IBaseMatrix<T>& rhs) {
+        LazyMatrix<T> result{lhs.rows(), rhs.cols()};
+
+        for (int i = 0; i < lhs.rows(); i++)
+            for (int j = 0; j < rhs.cols(); j++) {
+                auto row = lhs.row(i);
+                auto col = rhs.col(j);
+
+                result.set_value(i, j, row * col);
+            }
+
+        return result;
+    }
 }
