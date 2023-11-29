@@ -13,3 +13,6 @@ add_subdirectory(benchmark)
 
 add_executable(det src/det.cpp)
 target_link_libraries(det hwmx_lib)
+
+add_executable(optimal_order src/optimal_order.cpp)
+target_link_libraries(optimal_order hwmx_lib)

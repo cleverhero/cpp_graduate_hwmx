@@ -22,8 +22,17 @@
 ❯ 2 42 1 1 1
 ```
 
+```bash
+❯ ./optimal_order
+❯ 5 30 35 15 5 10
+```
+
 #### Running benchmark
 
 ```bash
-❯ ./benchmarks/base_vs_lazy.cpp {N} {K}
+❯ ./benchmarks/base_vs_lazy {N} {K}
+```
+
+```bash
+❯ ./benchmarks/matrix_chain_bench {N} {K} {MAX_SIZE}
 ```
