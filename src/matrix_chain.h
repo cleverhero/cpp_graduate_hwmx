@@ -44,18 +44,14 @@ namespace hwmx {
         }
 
         void print_order(size_t l, size_t r) {
-            if (l == r) {
-                std::cout << l;
+            if (l == r)
                 return;
-            }
 
             size_t k = order_info.value()[l][r].sep;
 
-            std::cout << '(';
             print_order(l, k);
-            std::cout << " * ";
             print_order(k + 1, r);
-            std::cout << ')';
+            std::cout << k << " ";
         }
 
         LazyMatrix<T> optimal_multiply(size_t l, size_t r) {
