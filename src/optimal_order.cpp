@@ -15,6 +15,10 @@ using MatrixUP = std::unique_ptr<hwmx::Matrix<T>>;
 
 int main() {
     size_t n; std::cin >> n;
+    if (n <= 1) {
+        std::cout << "Error. Expected n >= 2." << std::endl;
+        return 0;
+    }
 
     std::vector<int> dims(n);
     for (int i = 0; i < n; i++) std::cin >> dims[i];
