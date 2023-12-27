@@ -53,7 +53,7 @@ namespace hwmx {
         }
 
         virtual ~MemoryBuf() {
-            destroy(data, data + used);
+            hwmx::destroy(data, data + used);
             ::operator delete(data);
         }
     };
@@ -182,7 +182,7 @@ namespace hwmx {
 
             if (control_block_ptr->change(-1) == 0) {
                 delete control_block_ptr;
-                destroy(data, data + used);
+                hwmx::destroy(data, data + used);
                 ::operator delete(data);
             }
         }

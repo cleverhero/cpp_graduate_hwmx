@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
+#include "hwmx.h"
+#include "vector.h"
+
 
 namespace hwmx {
-    template<typename T, bool is_lazy, typename Traits> class Matrix;
-    template<typename T, bool is_lazy> class Vector;
-
     // MatrixLine -- proxy col or row of matrix that don't own resources.
     // It's can convert to Vector via copying resources and
     // do inplace math operations.
@@ -42,16 +42,18 @@ namespace hwmx {
                 return data[ln * y + ind];
         }
 
-        const T& const_ref_value(size_t ind) const {
+        const T& operator[](size_t ind) const {
             if constexpr(is_col)
                 return data[ind * y + ln];
             else
                 return data[ln * y + ind];
         }
 
-        void print() const noexcept {
-            for (size_t i = 0; i < size(); i++)
-                std::cout << const_ref_value(i) << ' ';
+        const T& const_ref_value(size_t ind) const {
+            if constexpr(is_col)
+                return data[ind * y + ln];
+            else
+                return data[ln * y + ind];
         }
 
         Vector<T> operator*(const T& rhs) const {
@@ -83,6 +85,22 @@ namespace hwmx {
             while (it1 != ite) {
                 *it1 -= *it2;
                 it1++; it2++;
+            }
+
+            return *this;
+        }
+
+        template<typename U>
+        requires requires(T t, U u) {
+            ( t /= u );
+        }
+        MatrixLine& operator /=(U&& rhs) {
+            auto it1 = begin();
+            auto ite = end();
+
+            while (it1 != ite) {
+                *it1 /= rhs;
+                it1++;
             }
 
             return *this;
@@ -122,12 +140,6 @@ namespace hwmx {
                 return MatrixGeneralIterator<const T, true, is_col>{ data, ln, y, x, y };
         }
     };
-
-    template<typename M>
-    using Row = MatrixLine<M, false>;
-
-    template<typename M>
-    using Col = MatrixLine<M, true>;
 
     template<typename T, bool is_col1, bool is_col2>
     auto operator*(const MatrixLine<T, is_col1>& lhs, const MatrixLine<T, is_col2>& rhs) {

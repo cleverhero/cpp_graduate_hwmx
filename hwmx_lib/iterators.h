@@ -152,11 +152,4 @@ namespace hwmx {
             );
         };
     };
-
-
-    template<typename T, bool is_one_line = false>
-    using RowMajorIterator = MatrixGeneralIterator<T, is_one_line, false>;
-
-    template<typename T, bool is_one_line = false>
-    using ColMajorIterator = MatrixGeneralIterator<T, is_one_line, true>;
 }

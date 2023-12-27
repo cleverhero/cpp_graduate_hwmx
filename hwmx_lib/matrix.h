@@ -7,30 +7,16 @@
 #include <ranges>
 #include <optional>
 
+#include "hwmx.h"
 #include "elements_buffer.h"
-#include "vector.h"
-#include "iterators.h"
-#include "matrix_traits.h"
 #include "matrix_line.h"
+#include "iterators.h"
 
 
 namespace ranges = std::ranges;
-namespace views = std::views;
 
 
 namespace hwmx {
-    template<typename T, bool is_lazy, typename Traits> class Matrix;
-
-    size_t gaussian_elimination(Matrix<double, false, MatrixTraits<double>>& matrix) noexcept;
-
-
-    class non_square_matrix_error : public std::runtime_error {
-    public:
-        non_square_matrix_error() throw()
-            : std::runtime_error("Matrix is non square.") {};
-    };
-    
-
     template<typename T>
     class IBaseMatrix {
     public:
@@ -64,7 +50,7 @@ namespace hwmx {
     };
 
 
-    template<typename T, bool is_lazy = false, typename Traits = MatrixTraits<T>>
+    template<typename T, bool is_lazy = false>
     class Matrix final: 
         private ElementsBuf_<T, is_lazy>,
         public IBaseMatrix<T>
@@ -123,17 +109,23 @@ namespace hwmx {
         Matrix(size_t x, size_t y, const IT& first):
             x(x), y(y), ElementsBuf_<T, is_lazy>(x*y, first) {}
 
-        static Matrix eye(size_t n) {
-            Matrix m{ n, n };
+        template<double_like U = T>
+        static Matrix<U, is_lazy> eye(size_t n) {
+            Matrix<U, is_lazy> m{ n, n };
             for (int i = 0; i < n; i++)
                 m.set_value(i, i, 1);
 
             return m;
         }
 
-        static Matrix iota(size_t n) {
-            auto elements = views::iota(0u, (n * n));
-            return Matrix{ n, n, elements.begin(), elements.end() };
+        template<double_like U = T>
+        requires std::convertible_to<size_t, U>
+        static Matrix<U, is_lazy> iota(size_t n) {
+            auto elements = ranges::iota_view<size_t, size_t>(0, n * n);
+
+            return Matrix<U, is_lazy>{
+                n, n, elements.begin()
+            };
         }
 
 
@@ -152,35 +144,6 @@ namespace hwmx {
 
         const T& const_ref_value(size_t ix, size_t iy) const {
             return data[ix * y + iy];
-        }
-
-        void print() const noexcept {
-            for (size_t i = 0; i < x; i++) {
-                row(i).print();
-                std::cout << std::endl;
-            }
-        }
-
-        double det() const {
-            if (x != y)
-                throw non_square_matrix_error{};
-
-            Matrix<double> m{ x, y };
-            std::transform(
-                cbegin(), cend(), m.begin(),
-                [](T el) { return Traits::to_double(el); }
-            );
-            size_t count_swaps = gaussian_elimination(m);
-            
-            std::vector<double> diag(x);
-            for (size_t i = 0; i < x; i++)
-                diag[i] = m[i][i];
-            
-            return std::reduce(
-                diag.begin(), diag.end(),
-                count_swaps % 2 ? -1.0 : 1.0,
-                std::multiplies<double>()
-            );
         }
 
         const Col<const T> col(size_t iy) const { return Col<const T>{ data, iy, x, y }; }
@@ -325,9 +288,6 @@ namespace hwmx {
         const_CMI<> col_cbegin() const noexcept { return item_citer<true>(0, 0); }
         const_CMI<> col_cend() const noexcept { return item_citer<true>(0, y); }
     };
-
-    template<typename T, typename Traits = MatrixTraits<T>>
-    using LazyMatrix = Matrix<T, true, Traits>;
 
 
     template<typename T>

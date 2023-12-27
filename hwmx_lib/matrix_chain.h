@@ -1,7 +1,10 @@
 #include <vector>
 #include <algorithm>
+#include <ranges> 
 
 #include "matrix.h"
+
+namespace views = std::ranges::views;
 
 
 namespace hwmx {

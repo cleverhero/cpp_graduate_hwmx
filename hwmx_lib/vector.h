@@ -1,13 +1,10 @@
 #pragma once
 
+#include "hwmx.h"
 #include "elements_buffer.h"
-#include "iterators.h"
 
 
 namespace hwmx {
-    template<typename M, bool is_col> class MatrixLine;
-
-
     // Vector is necessary to locate MatrixLine in own memory.
     template<typename T, bool is_lazy = false>
     class Vector: private ElementsBuf_<T, is_lazy> {
@@ -52,7 +49,11 @@ namespace hwmx {
                 std::cout << get_value(i) << ' ';
         }
 
-        Vector<T> operator*(const T& rhs) const {
+        template<typename U>
+        requires requires(T t, U u) {
+            ( t *= u );
+        }
+        Vector<T> operator*(U&& rhs) const {
             Vector<T> res{ *this };
 
             res *= rhs;
