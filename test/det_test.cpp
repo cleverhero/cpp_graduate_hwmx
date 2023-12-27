@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <filesystem>
+
+#include "hwmx.h"
 #include "matrix.h"
+#include "algorithm.h"
 #include "config.h"
 
 
@@ -24,7 +27,7 @@ TEST(HwmxTests, Test_Big) {
     double ans; answerf >> ans;
     auto m = hwmx::Matrix<double>{ size, size, std::istream_iterator<double>(testf) };
 
-    ASSERT_FLOAT_EQ(m.det(), ans);
+    ASSERT_FLOAT_EQ(hwmx::det(m), ans);
 
     testf.close();
     answerf.close();

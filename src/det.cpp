@@ -2,6 +2,7 @@
 #include <iterator>
 
 #include "matrix.h"
+#include "algorithm.h"
 
 
 using hwmx::Matrix;
@@ -16,7 +17,7 @@ int main() {
         std::istream_iterator<double>(std::cin)
     };
 
-	std::cout << m.det() << std::endl;
+	std::cout << hwmx::det(m) << std::endl;
 
     return 0;
 }
