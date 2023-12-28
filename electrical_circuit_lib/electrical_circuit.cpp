@@ -83,7 +83,9 @@ public:
         index_t start_loop;
         index_t finish_loop;
 
-        find_loop_(0, colors, parents, start_loop, finish_loop);
+        for (index_t start_node = 0; start_node < size; start_node++)
+            if (find_loop_(start_node, colors, parents, start_loop, finish_loop))
+                break;
 
         index_t curr = finish_loop;
         Loop loop;
@@ -102,22 +104,27 @@ public:
         std::queue<index_t> q;
         std::vector<bool> used(size);
         
-        q.push(0); used[0] = true;
-        while(!q.empty()) {
-            index_t curr = q.front(); q.pop();
-            auto& edges = incidence_matrix[curr];
+        for (index_t start_node = 0; start_node < size; start_node++) {
+            if (used[start_node])
+                continue;
 
-            for (index_t i = 0; i < size; i++) {
-                if (!edges[i]) continue;
+            q.push(start_node); used[start_node] = true;
+            while(!q.empty()) {
+                index_t curr = q.front(); q.pop();
+                auto& edges = incidence_matrix[curr];
 
-                if (!used[i]) {
-                    spanning_tree.add_edge(curr, i);
+                for (index_t i = 0; i < size; i++) {
+                    if (!edges[i]) continue;
 
-                    q.push(i); used[i] = true;
+                    if (!used[i]) {
+                        spanning_tree.add_edge(curr, i);
+
+                        q.push(i); used[i] = true;
+                    }
                 }
             }
         }
-
+        
         return spanning_tree;
     }
 

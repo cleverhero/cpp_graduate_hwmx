@@ -41,7 +41,7 @@ void test(std::string test_name) {
 
 
 TEST(HwmxTests, Test_All) {
-    size_t TEST_COUNT = 5;
+    size_t TEST_COUNT = 6;
 
     for (int i = 1; i <= TEST_COUNT; i++) {
         test("test" + std::to_string(i));
