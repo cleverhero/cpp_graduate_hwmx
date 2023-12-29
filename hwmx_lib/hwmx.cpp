@@ -6,7 +6,7 @@
 
 
 namespace hwmx {
-    size_t gaussian_elimination(Matrix<double>& matrix) noexcept {
+    size_t gaussian_elimination(Matrix<double>& matrix, bool throw_column_of_zeros) {
         const double EPS = std::pow(10, -8);
         auto abs_pred = [](double a, double b) { return std::abs(a) < std::abs(b); };
         size_t count_swaps = 0;
@@ -16,7 +16,10 @@ namespace hwmx {
             auto k = std::distance(col_i.begin(), max_el);
 
             if (std::abs(*max_el) < EPS)
-                continue;
+                if (throw_column_of_zeros)
+                    throw column_of_zeros_error(i);
+                else
+                    continue;
 
             if (i != k) {
                 matrix.swap_rows(i, k);

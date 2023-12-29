@@ -10,26 +10,13 @@
 
 
 namespace hwmx {
-    class non_linear_equation_system_error : public std::runtime_error {
-    public:
-        non_linear_equation_system_error() throw()
-            : std::runtime_error("Matrix is not linear equation system.") {};
-    };
-
-    class non_square_matrix_error : public std::runtime_error {
-    public:
-        non_square_matrix_error() throw()
-            : std::runtime_error("Matrix is non square.") {};
-    };
-
-
     template<double_like T, bool is_lazy>
     Vector<double> solve(const Matrix<T, is_lazy>& matrix) {
         if (matrix.cols() != matrix.rows() + 1)
             throw non_linear_equation_system_error{};
 
         Matrix<double> m{ matrix.rows(), matrix.cols(), matrix.cbegin() };
-        gaussian_elimination(m);
+        gaussian_elimination(m, true);
 
         for (int i = m.rows() - 1; i >= 0; i--) {
             m[i] /= +m[i][i];

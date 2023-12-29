@@ -2,5 +2,5 @@
 
 
 namespace hwmx {
-    void find_intensity_list(std::istream& in, std::ostream& out);
+    void resolve_intensity_puzzle(std::istream& in, std::ostream& out);
 }

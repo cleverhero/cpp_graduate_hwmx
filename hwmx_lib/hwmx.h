@@ -16,6 +16,35 @@ namespace hwmx {
     };
 
 
+    // exceptions
+
+    class non_linear_equation_system_error : public std::runtime_error {
+    public:
+        non_linear_equation_system_error() throw()
+            : std::runtime_error("Matrix is not linear equation system.") {};
+    };
+
+    class non_square_matrix_error : public std::runtime_error {
+    public:
+        non_square_matrix_error() throw()
+            : std::runtime_error("Matrix is non square.") {};
+    };
+
+    class column_of_zeros_error: public std::runtime_error {
+    private:
+        size_t column_ind;
+
+    public:
+        column_of_zeros_error(size_t ind) throw(): 
+            std::runtime_error("Column " + std::to_string(ind) + " is consist of zeros."),
+            column_ind(ind) {};
+
+        size_t get_column_ind() {
+            return column_ind;
+        }
+    };
+
+
     // types
     
     template<typename T, bool is_lazy> class Matrix;
@@ -42,7 +71,7 @@ namespace hwmx {
 
     // Algorithms
 
-    size_t gaussian_elimination(Matrix<double, false>& matrix) noexcept;
+    size_t gaussian_elimination(Matrix<double, false>& matrix, bool throw_column_of_zeros = false);
 
     template<double_like T, bool is_lazy>
     Vector<double, false> solve(const Matrix<T, is_lazy>& matrix);

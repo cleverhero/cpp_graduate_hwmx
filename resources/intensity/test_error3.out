@@ -1,0 +1,3 @@
+Bad circuit.
+Loop: (1 7) (7 12) (12 35) (35 3) (3 33) (33 1)  has zero resistance.
+Impossible to get result.

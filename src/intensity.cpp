@@ -4,6 +4,6 @@
 
 
 int main() {
-    hwmx::find_intensity_list(std::cin, std::cout);
+    hwmx::resolve_intensity_puzzle(std::cin, std::cout);
     return 0;
 }

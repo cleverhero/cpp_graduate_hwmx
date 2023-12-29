@@ -25,12 +25,12 @@ void test(std::string test_name) {
     }
 
     std::stringstream result;
-    hwmx::find_intensity_list(testf, result);
+    hwmx::resolve_intensity_puzzle(testf, result);
 
     ASSERT_TRUE(
         std::mismatch(
             std::istream_iterator<char>(answerf),
-            std::istream_iterator<char>{}, 
+            std::istream_iterator<char>{},
             std::istream_iterator<char>(result)
         ).first == std::istream_iterator<char>{}
     );
@@ -40,11 +40,20 @@ void test(std::string test_name) {
 }
 
 
-TEST(HwmxTests, Test_All) {
-    size_t TEST_COUNT = 6;
+TEST(HwmxTests, Test_Success) {
+    size_t TEST_COUNT = 10;
 
     for (int i = 1; i <= TEST_COUNT; i++) {
         test("test" + std::to_string(i));
+        std::cout << i << " passed;" << std::endl;
+    }
+}
+
+TEST(HwmxTests, Test_Error) {
+    size_t TEST_COUNT = 3;
+
+    for (int i = 1; i <= TEST_COUNT; i++) {
+        test("test_error" + std::to_string(i));
         std::cout << i << " passed;" << std::endl;
     }
 }
