@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdexcept>
 #include <algorithm>
 
 #include "hwmx.h"
